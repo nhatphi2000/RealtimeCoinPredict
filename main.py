@@ -28,11 +28,7 @@ app.layout = html.Div([
                     html.Label("Select a coin:"),
                     dcc.Dropdown(
                         id="coin-dropdown",
-                        options=[
-                            {"label": "BTC", "value": "bitcoin"},
-                            {"label": "ETH", "value": "ethereum"},
-                            {"label": "ADA", "value": "cardano"}
-                        ],
+                        options=coinList,
                         value="bitcoin"
                     )
                 ], style={"margin-bottom": "20px"}),

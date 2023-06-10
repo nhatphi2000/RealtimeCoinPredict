@@ -47,8 +47,8 @@ def get_historical_prices(coin_name, vs_currency, days):
         print(f"Error occurred. Status Code: {response.status_code}")
         return None
     
-def get_formatted_coin_list(limit=100):
-    url = f"https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page={limit}&page=1&sparkline=false"
+def get_formatted_coin_list():
+    url = f"https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&locale=en"
     response = requests.get(url)
     if response.status_code == 200:
         coin_list = response.json()
