@@ -1,5 +1,6 @@
 import requests
 from datetime import datetime
+import json
 
 def get_historical_prices(coin_name, vs_currency, days):
     # Define the API endpoint and parameters
@@ -46,9 +47,17 @@ def get_historical_prices(coin_name, vs_currency, days):
         print(f"Error occurred. Status Code: {response.status_code}")
         return None
     
-def get_coin_names_and_symbols():
-    url = "https://api.coingecko.com/api/v3/coins/list"
+def get_formatted_coin_list(limit=100):
+    url = f"https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page={limit}&page=1&sparkline=false"
     response = requests.get(url)
-    data = response.json()
-    coin_names_and_symbols = [{"label": coin["name"], "value": coin["symbol"]} for coin in data]
-    return coin_names_and_symbols
+    if response.status_code == 200:
+        coin_list = response.json()
+        formatted_coins = []
+        for coin in coin_list:
+            label = coin['symbol'].upper()
+            value = coin['id']
+            formatted_coin = {"label": label, "value": value}
+            formatted_coins.append(formatted_coin)
+        return formatted_coins
+    else:
+        return None

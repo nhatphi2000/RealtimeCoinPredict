@@ -26,3 +26,4 @@ def get_train_data(coinname):
     train=new_data[:999]
 
     return train
+
