@@ -13,6 +13,9 @@ server = app.server
 train = get_train_data("bitcoin")
 coinList=get_formatted_coin_list() #lay danh sach coin, tuy nhien bi gioi han lan get api
 
+
+
+
 app.layout = html.Div([
     html.H1("Stock Price Analysis Dashboard", style={"textAlign": "center"}),
 
@@ -25,7 +28,11 @@ app.layout = html.Div([
                     html.Label("Select a coin:"),
                     dcc.Dropdown(
                         id="coin-dropdown",
-                        options=coinList,
+                        options=[
+                            {"label": "BTC", "value": "bitcoin"},
+                            {"label": "ETH", "value": "ethereum"},
+                            {"label": "ADA", "value": "cardano"}
+                        ],
                         value="bitcoin"
                     )
                 ], style={"margin-bottom": "20px"}),

@@ -40,7 +40,7 @@ def get_historical_prices(coin_name, vs_currency, days):
                     roc = (price_value - previous_price) / previous_price
                 historical_data.append({"Date": date, "Close": price_value, "ROC": roc})
                 previous_price = price_value
-
+        
         return historical_data
 
     else:
