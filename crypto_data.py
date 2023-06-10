@@ -37,7 +37,7 @@ def get_historical_prices(coin_name, vs_currency, days):
                 roc = None
                 if previous_price is not None:
                     roc = (price_value - previous_price) / previous_price
-                historical_data.append({"date": date, "close_price": price_value, "roc": roc})
+                historical_data.append({"Date": date, "Close": price_value, "ROC": roc})
                 previous_price = price_value
 
         return historical_data
@@ -45,3 +45,10 @@ def get_historical_prices(coin_name, vs_currency, days):
     else:
         print(f"Error occurred. Status Code: {response.status_code}")
         return None
+    
+def get_coin_names_and_symbols():
+    url = "https://api.coingecko.com/api/v3/coins/list"
+    response = requests.get(url)
+    data = response.json()
+    coin_names_and_symbols = [{"label": coin["name"], "value": coin["symbol"]} for coin in data]
+    return coin_names_and_symbols
