@@ -11,7 +11,7 @@ app = dash.Dash()
 server = app.server
 # Example usage
 
-train, valid, df = predictLSTM("bitcoin")
+train, valid, predict, df = predictLSTM("bitcoin")
 coinList=get_formatted_coin_list() #lay danh sach coin, tuy nhien bi gioi han lan get api
 
 
@@ -58,13 +58,39 @@ app.layout = html.Div([
                         "data": [
                             go.Scatter(
                                 x=valid.index,
+                                y=valid["Close"],
+                                mode='lines+markers',
+                                line=dict(color="#0000ff"),
+                                name="Close Price",
+                            ),
+                            go.Scatter(
+                                x=valid.index,
                                 y=valid["Predictions"],
+                                mode='lines+markers',
+                                line=dict(color="#ffe476"),
+                                name="Predictions Price"
+                            )
+                        ],
+                        "layout": go.Layout(
+                            title='Comparision Predicted Closing Price',
+                            xaxis={'title': 'Date'},
+                            yaxis={'title': 'Closing Rate (USD)'}
+                        )
+                    }
+                ),
+                 dcc.Graph(
+                    id="next-predict-graph",
+                    figure={
+                        "data": [
+                            go.Scatter(
+                                x=predict.index,
+                                y=predict["Predictions"],
                                 mode='lines+markers',
                                 name="Close Price",
                             )
                         ],
                         "layout": go.Layout(
-                            title='Predicted Closing Price',
+                            title='Predicted Next 5 Days Closing Price',
                             xaxis={'title': 'Date'},
                             yaxis={'title': 'Closing Rate (USD)'}
                         )
@@ -78,10 +104,11 @@ app.layout = html.Div([
 @app.callback(
     Output("actual-graph", "figure"),
     Output("predict-graph", "figure"),
+    Output("next-predict-graph", "figure"),
     [Input("coin-dropdown", "value")]
 )
 def update_graphs(coin):
-    train, valid, df = predictLSTM(coin)
+    train, valid, predict, df = predictLSTM(coin)
 
     actual_figure = {
         "data": [
@@ -103,19 +130,41 @@ def update_graphs(coin):
         "data": [
             go.Scatter(
                 x=valid.index,
-                y=valid["Predictions"],
+                y=valid["Close"],
                 mode='lines+markers',
                 name="Close Price",
-            )
+            ),
+            go.Scatter(
+                x=valid.index,
+                y=valid["Predictions"],
+                mode='lines+markers',
+                name="Predictions Price",
+            ),
         ],
         "layout": go.Layout(
-            title='Predicted Closing Price',
+            title='Comparision Predicted Closing Price',
             xaxis={'title': 'Date'},
             yaxis={'title': 'Closing Rate (USD)'}
         )
     }
 
-    return actual_figure, predict_figure
+    next_predict_figure = {
+        "data": [
+            go.Scatter(
+                x=predict.index,
+                y=predict["Predictions"],
+                mode='lines+markers',
+                name="Close Price",
+            )
+        ],
+        "layout": go.Layout(
+            title='Predicted Next 5 Days Closing Price',
+            xaxis={'title': 'Date'},
+            yaxis={'title': 'Closing Rate (USD)'}
+        )
+    }
+
+    return actual_figure, predict_figure, next_predict_figure
 
 
 if __name__=='__main__':

@@ -4,6 +4,7 @@ from keras.models import load_model
 from keras.layers import LSTM,Dropout,Dense
 from crypto_data import get_historical_prices
 from sklearn.preprocessing import MinMaxScaler
+from datetime import datetime, timedelta
 import numpy as np
 import pandas as pd
 
@@ -52,6 +53,87 @@ def predictLSTM(coinname):
     lstm_model.compile(loss='mean_squared_error',optimizer='adam')
     lstm_model.fit(x_train_data,y_train_data,epochs=1,batch_size=1,verbose=2)
 
+
+    #start predict next 5 days
+    closedf=scaler.fit_transform(np.array(final_dataset).reshape(-1,1))
+    test_data=closedf[1000:len(closedf),:1]
+    x_input=test_data[len(test_data)-time_step:].reshape(1,-1)
+    temp_input=list(x_input)
+    temp_input=temp_input[0].tolist()
+    lst_output=[]
+    n_steps=time_step
+    i=0
+    pred_days = 5
+    while(i<pred_days):
+        
+        if(len(temp_input)>time_step):
+            
+            x_input=np.array(temp_input[1:])
+            #print("{} day input {}".format(i,x_input))
+            x_input = x_input.reshape(1,-1)
+            x_input = x_input.reshape((1, n_steps, 1))
+            
+            yhat = lstm_model.predict(x_input, verbose=0)
+            #print("{} day output {}".format(i,yhat))
+            temp_input.extend(yhat[0].tolist())
+            temp_input=temp_input[1:]
+            #print(temp_input)
+        
+            lst_output.extend(yhat.tolist())
+            i=i+1
+            
+        else:
+            
+            x_input = x_input.reshape((1, n_steps,1))
+            yhat = lstm_model.predict(x_input, verbose=0)
+            temp_input.extend(yhat[0].tolist())
+            
+            lst_output.extend(yhat.tolist())
+            i=i+1
+
+    # Get today's date
+    start_date = datetime.now().date()
+    start_date = start_date + timedelta(days=1)
+
+    # Create an empty list to store the dictionaries
+    next5days = []
+
+    # Generate the next 5 days
+    for i in range(5):
+        # Create a dictionary with the keys "Date" and "Predictions"
+        day_dict = {"Date": start_date, "Predictions": None}
+        
+        # Add the dictionary to the list
+        next5days.append(day_dict)
+        
+        # Increment the date by 1 day
+        start_date += timedelta(days=1)
+
+    # Create a DataFrame from the list of dictionaries
+
+    Predict = pd.DataFrame(next5days)
+    Predict.index=Predict.Date
+    Predict.drop("Date",axis=1,inplace=True)
+
+
+    last_days=np.arange(1,time_step+1)
+    day_pred=np.arange(time_step+1,time_step+pred_days+1)
+    temp_mat = np.empty((len(last_days)+pred_days+1,1))
+    temp_mat[:] = np.nan
+    temp_mat = temp_mat.reshape(1,-1).tolist()[0]
+
+    last_original_days_value = temp_mat
+    next_predicted_days_value = temp_mat
+
+    last_original_days_value[0:time_step+1] = scaler.inverse_transform(closedf[len(closedf)-time_step:]).reshape(1,-1).tolist()[0]
+    next_predicted_days_value[time_step+1:] = scaler.inverse_transform(np.array(lst_output).reshape(-1,1)).reshape(1,-1).tolist()[0]
+
+    for i in range(61,66):
+        Predict["Predictions"][i-61]= next_predicted_days_value[i]
+
+    print(Predict.tail())
+
+
     inputs_data=new_dataset[len(new_dataset)-len(valid_data)-60:].values
     inputs_data=inputs_data.reshape(-1,1)
     inputs_data=scaler.transform(inputs_data)
@@ -64,15 +146,16 @@ def predictLSTM(coinname):
     X_test=np.reshape(X_test,(X_test.shape[0],X_test.shape[1],1))
 
     predicted_closing_price=lstm_model.predict(X_test)
-    print("value len:", len(predicted_closing_price))
     predicted_closing_price=scaler.inverse_transform(predicted_closing_price)
 
     train_data=new_dataset[:1000]
     valid_data=new_dataset[1000:]
+    valid_data["Predictions"]=predicted_closing_price
+
 
 
 
     
-    return train_data, valid_data, df
+    return train_data, valid_data, Predict, df
 
 
