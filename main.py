@@ -4,13 +4,14 @@ import dash_html_components as html
 import plotly.graph_objs as go
 from train import get_train_data
 from crypto_data import get_formatted_coin_list
+from predict_data import predictLSTM
 from dash.dependencies import Input, Output
 
 app = dash.Dash()
 server = app.server
 # Example usage
 
-train = get_train_data("bitcoin")
+train, valid, df = predictLSTM("bitcoin")
 coinList=get_formatted_coin_list() #lay danh sach coin, tuy nhien bi gioi han lan get api
 
 
@@ -80,7 +81,7 @@ app.layout = html.Div([
     [Input("coin-dropdown", "value")]
 )
 def update_graphs(coin):
-    train = get_train_data(coin)
+    train, valid, df = predictLSTM(coin)
 
     actual_figure = {
         "data": [
