@@ -2,7 +2,6 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objs as go
-from train import get_train_data
 from crypto_data import get_formatted_coin_list
 from predict_data import predictLSTM
 from dash.dependencies import Input, Output
@@ -82,16 +81,16 @@ app.layout = html.Div([
                     id="next-predict-graph",
                     figure={
                         "data": [
-                            go.Scatter(
-                                x=predict.index,
+                            go.Bar(
+                                x=["LSTM"],
                                 y=predict["Predictions"],
-                                mode='lines+markers',
-                                name="Close Price",
+                                name="LSTM",
+                                width=0.5
                             )
                         ],
                         "layout": go.Layout(
-                            title='Predicted Next 5 Days Closing Price',
-                            xaxis={'title': 'Date'},
+                            title='Predicted Next Day Closing Price',
+                            xaxis={'title': 'Bar Name'},
                             yaxis={'title': 'Closing Rate (USD)'}
                         )
                     }
@@ -150,16 +149,16 @@ def update_graphs(coin):
 
     next_predict_figure = {
         "data": [
-            go.Scatter(
-                x=predict.index,
+            go.Bar(
+                x=["LSTM"],
                 y=predict["Predictions"],
-                mode='lines+markers',
-                name="Close Price",
+                name="LSTM",
+                width=0.5
             )
         ],
         "layout": go.Layout(
-            title='Predicted Next 5 Days Closing Price',
-            xaxis={'title': 'Date'},
+            title='Predicted Next Day Closing Price',
+            xaxis={'title': 'Bar Name'},
             yaxis={'title': 'Closing Rate (USD)'}
         )
     }

@@ -1,4 +1,3 @@
-from train import get_train_data
 from keras.models import Sequential
 from keras.models import load_model
 from keras.layers import LSTM,Dropout,Dense
@@ -53,85 +52,37 @@ def predictLSTM(coinname):
     lstm_model.compile(loss='mean_squared_error',optimizer='adam')
     lstm_model.fit(x_train_data,y_train_data,epochs=1,batch_size=1,verbose=2)
 
-
-    #start predict next 5 days
-    closedf=scaler.fit_transform(np.array(final_dataset).reshape(-1,1))
-    test_data=closedf[1000:len(closedf),:1]
-    x_input=test_data[len(test_data)-time_step:].reshape(1,-1)
-    temp_input=list(x_input)
-    temp_input=temp_input[0].tolist()
-    lst_output=[]
-    n_steps=time_step
-    i=0
-    pred_days = 5
-    while(i<pred_days):
-        
-        if(len(temp_input)>time_step):
-            
-            x_input=np.array(temp_input[1:])
-            #print("{} day input {}".format(i,x_input))
-            x_input = x_input.reshape(1,-1)
-            x_input = x_input.reshape((1, n_steps, 1))
-            
-            yhat = lstm_model.predict(x_input, verbose=0)
-            #print("{} day output {}".format(i,yhat))
-            temp_input.extend(yhat[0].tolist())
-            temp_input=temp_input[1:]
-            #print(temp_input)
-        
-            lst_output.extend(yhat.tolist())
-            i=i+1
-            
-        else:
-            
-            x_input = x_input.reshape((1, n_steps,1))
-            yhat = lstm_model.predict(x_input, verbose=0)
-            temp_input.extend(yhat[0].tolist())
-            
-            lst_output.extend(yhat.tolist())
-            i=i+1
-
     # Get today's date
     start_date = datetime.now().date()
     start_date = start_date + timedelta(days=1)
 
     # Create an empty list to store the dictionaries
-    next5days = []
+    nextday = []
 
     # Generate the next 5 days
-    for i in range(5):
+    for i in range(1):
         # Create a dictionary with the keys "Date" and "Predictions"
         day_dict = {"Date": start_date, "Predictions": None}
         
         # Add the dictionary to the list
-        next5days.append(day_dict)
+        nextday.append(day_dict)
         
         # Increment the date by 1 day
         start_date += timedelta(days=1)
 
     # Create a DataFrame from the list of dictionaries
 
-    Predict = pd.DataFrame(next5days)
+    Predict = pd.DataFrame(nextday)
     Predict.index=Predict.Date
     Predict.drop("Date",axis=1,inplace=True)
 
+    #predict 1 day later
+    X_input = new_dataset.iloc[-time_step:].Close.values               # getting last 60 rows and converting to array
+    X_input = scaler.fit_transform(X_input.reshape(-1,1))      # converting to 2D array and scaling
+    X_input = np.reshape(X_input, (1,time_step,1))                    # reshaping : converting to 3D array
+    LSTM_prediction = scaler.inverse_transform(lstm_model.predict(X_input))
+    Predict["Predictions"][0] = LSTM_prediction[0][0]
 
-    last_days=np.arange(1,time_step+1)
-    day_pred=np.arange(time_step+1,time_step+pred_days+1)
-    temp_mat = np.empty((len(last_days)+pred_days+1,1))
-    temp_mat[:] = np.nan
-    temp_mat = temp_mat.reshape(1,-1).tolist()[0]
-
-    last_original_days_value = temp_mat
-    next_predicted_days_value = temp_mat
-
-    last_original_days_value[0:time_step+1] = scaler.inverse_transform(closedf[len(closedf)-time_step:]).reshape(1,-1).tolist()[0]
-    next_predicted_days_value[time_step+1:] = scaler.inverse_transform(np.array(lst_output).reshape(-1,1)).reshape(1,-1).tolist()[0]
-
-    for i in range(61,66):
-        Predict["Predictions"][i-61]= next_predicted_days_value[i]
-
-    print(Predict.tail())
 
 
     inputs_data=new_dataset[len(new_dataset)-len(valid_data)-60:].values
@@ -144,6 +95,7 @@ def predictLSTM(coinname):
         
     X_test=np.array(X_test)
     X_test=np.reshape(X_test,(X_test.shape[0],X_test.shape[1],1))
+    print("do dai ne:",len(X_test))
 
     predicted_closing_price=lstm_model.predict(X_test)
     predicted_closing_price=scaler.inverse_transform(predicted_closing_price)
@@ -151,8 +103,6 @@ def predictLSTM(coinname):
     train_data=new_dataset[:1000]
     valid_data=new_dataset[1000:]
     valid_data["Predictions"]=predicted_closing_price
-
-
 
 
     
