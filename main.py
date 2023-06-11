@@ -46,7 +46,7 @@ app.layout = html.Div([
                             )
                         ],
                         "layout": go.Layout(
-                            title='Scatter Plot',
+                            title='Actual Closing Price',
                             xaxis={'title': 'Date'},
                             yaxis={'title': 'Closing Rate (USD)'}
                         )
@@ -57,14 +57,14 @@ app.layout = html.Div([
                     figure={
                         "data": [
                             go.Scatter(
-                                x=train.index,
-                                y=train["Close"],
+                                x=valid.index,
+                                y=valid["Predictions"],
                                 mode='lines+markers',
                                 name="Close Price",
                             )
                         ],
                         "layout": go.Layout(
-                            title='Scatter Plot',
+                            title='Predicted Closing Price',
                             xaxis={'title': 'Date'},
                             yaxis={'title': 'Closing Rate (USD)'}
                         )
@@ -102,8 +102,8 @@ def update_graphs(coin):
     predict_figure = {
         "data": [
             go.Scatter(
-                x=train.index,
-                y=train["Close"],
+                x=valid.index,
+                y=valid["Predictions"],
                 mode='lines+markers',
                 name="Close Price",
             )

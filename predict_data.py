@@ -9,10 +9,10 @@ import pandas as pd
 
 def predictLSTM(coinname):
 
-
+    time_step=60
     coin_name = coinname
     vs_currency = "usd"
-    days = 1000
+    days = 1200
 
     cryptoData = get_historical_prices(coin_name, vs_currency, days)
     df = pd.DataFrame(cryptoData, columns=['Date','Close','ROC'])
@@ -31,8 +31,8 @@ def predictLSTM(coinname):
     new_dataset.drop("Date",axis=1,inplace=True)
     final_dataset=new_dataset.values
 
-    train_data=final_dataset[0:999,:]
-    valid_data=final_dataset[999:,:]
+    train_data=final_dataset[0:1000,:]
+    valid_data=final_dataset[1000:,:]
 
     scaled_data=scaler.fit_transform(final_dataset)
     x_train_data,y_train_data=[],[]
@@ -43,27 +43,36 @@ def predictLSTM(coinname):
     x_train_data,y_train_data=np.array(x_train_data),np.array(y_train_data)
     x_train_data=np.reshape(x_train_data,(x_train_data.shape[0],x_train_data.shape[1],1))
 
+    print(new_dataset)
+
     lstm_model=Sequential()
     lstm_model.add(LSTM(units=50,return_sequences=True,input_shape=(x_train_data.shape[1],1)))
     lstm_model.add(LSTM(units=50))
     lstm_model.add(Dense(1))
+    lstm_model.compile(loss='mean_squared_error',optimizer='adam')
+    lstm_model.fit(x_train_data,y_train_data,epochs=1,batch_size=1,verbose=2)
+
     inputs_data=new_dataset[len(new_dataset)-len(valid_data)-60:].values
     inputs_data=inputs_data.reshape(-1,1)
     inputs_data=scaler.transform(inputs_data)
-    lstm_model.compile(loss='mean_squared_error',optimizer='adam')
-    lstm_model.fit(x_train_data,y_train_data,epochs=1,batch_size=1,verbose=2)
 
     X_test=[]
     for i in range(60,inputs_data.shape[0]):
         X_test.append(inputs_data[i-60:i,0])
+        
     X_test=np.array(X_test)
     X_test=np.reshape(X_test,(X_test.shape[0],X_test.shape[1],1))
+
     predicted_closing_price=lstm_model.predict(X_test)
+    print("value len:", len(predicted_closing_price))
     predicted_closing_price=scaler.inverse_transform(predicted_closing_price)
 
-    train_data=new_dataset[:999]
-    valid_data=new_dataset[999:]
-    valid_data['Predictions']=predicted_closing_price
+    train_data=new_dataset[:1000]
+    valid_data=new_dataset[1000:]
+
+
 
     
     return train_data, valid_data, df
+
+
