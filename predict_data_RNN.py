@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import numpy as np
 import pandas as pd
 
-def predict_RNN(coinname):
+def predict_RNN(coinname,type):
 
     time_step=60
     coin_name = coinname
@@ -21,11 +21,18 @@ def predict_RNN(coinname):
 
     df.index=df['Date']
     data=df.sort_index(ascending=True,axis=0)
-    new_dataset=pd.DataFrame(index=range(0,len(df)),columns=['Date','Close'])
-    for i in range(0,len(data)):
-        new_dataset["Date"][i]=data['Date'][i]
-        new_dataset["Close"][i]=data["Close"][i]    
+    if type =="Close":
+            new_dataset=pd.DataFrame(index=range(0,len(df)),columns=['Date','Close'])
+            for i in range(0,len(data)):
+                new_dataset["Date"][i]=data['Date'][i]
+                new_dataset["Close"][i]=data["Close"][i]    
+    else:
+            new_dataset=pd.DataFrame(index=range(0,len(df)),columns=['Date','Close'])
+            for i in range(0,len(data)):
+                new_dataset["Date"][i]=data['Date'][i]
+                new_dataset["Close"][i]=data["ROC"][i]   
 
+    new_dataset["Close"] = new_dataset["Close"].fillna(0)
     scaler=MinMaxScaler(feature_range=(0,1))
     new_dataset.index=new_dataset.Date
     new_dataset.drop("Date",axis=1,inplace=True)

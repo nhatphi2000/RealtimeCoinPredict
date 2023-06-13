@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import numpy as np
 import pandas as pd
 
-def predictLSTM(coinname):
+def predictLSTM(coinname,type):
 
     time_step=60
     coin_name = coinname
@@ -21,10 +21,18 @@ def predictLSTM(coinname):
 
     df.index=df['Date']
     data=df.sort_index(ascending=True,axis=0)
-    new_dataset=pd.DataFrame(index=range(0,len(df)),columns=['Date','Close'])
-    for i in range(0,len(data)):
-        new_dataset["Date"][i]=data['Date'][i]
-        new_dataset["Close"][i]=data["Close"][i]    
+    if type =="Close":
+            new_dataset=pd.DataFrame(index=range(0,len(df)),columns=['Date','Close'])
+            for i in range(0,len(data)):
+                new_dataset["Date"][i]=data['Date'][i]
+                new_dataset["Close"][i]=data["Close"][i]    
+    else:
+            new_dataset=pd.DataFrame(index=range(0,len(df)),columns=['Date','Close'])
+            for i in range(0,len(data)):
+                new_dataset["Date"][i]=data['Date'][i]
+                new_dataset["Close"][i]=data["ROC"][i]   
+
+    new_dataset["Close"] = new_dataset["Close"].fillna(0)  
 
     scaler=MinMaxScaler(feature_range=(0,1))
     new_dataset.index=new_dataset.Date
@@ -103,6 +111,8 @@ def predictLSTM(coinname):
     train_data=new_dataset[:1000]
     valid_data=new_dataset[1000:]
     valid_data["Predictions"]=predicted_closing_price
+
+
 
 
     

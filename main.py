@@ -11,8 +11,8 @@ app = dash.Dash()
 server = app.server
 # Example usage
 
-train, valid, predict, df = predictLSTM("bitcoin")
-trainRNN, validRNN, predictRNN, dfRNN = predict_RNN("bitcoin")
+train, valid, predict, df = predictLSTM("bitcoin","Close")
+trainRNN, validRNN, predictRNN, dfRNN = predict_RNN("bitcoin","Close")
 coinList=get_formatted_coin_list() #lay danh sach coin, tuy nhien bi gioi han lan get api
 
 
@@ -31,6 +31,14 @@ app.layout = html.Div([
                         id="coin-dropdown",
                         options=coinList,
                         value="bitcoin"
+                    ),
+                     dcc.Dropdown(
+                        id="type-dropdown",
+                        options=[
+                                    {'label': 'Close Price', 'value': 'Close'},
+                                    {'label': 'Rate of Change', 'value': 'ROC'},
+                                ],
+                        value="Close"
                     )
                 ], style={"margin-bottom": "20px"}),
 
@@ -124,11 +132,11 @@ app.layout = html.Div([
     Output("actual-graph", "figure"),
     Output("predict-graph", "figure"),
     Output("next-predict-graph", "figure"),
-    [Input("coin-dropdown", "value")]
+    [Input("coin-dropdown", "value"),Input("type-dropdown", "value")]
 )
-def update_graphs(coin):
-    train, valid, predict, df = predictLSTM(coin)
-    trainRNN, validRNN,predictRNN, dfRNN = predict_RNN(coin)
+def update_graphs(coin,type):
+    train, valid, predict, df = predictLSTM(coin,type)
+    trainRNN, validRNN,predictRNN, dfRNN = predict_RNN(coin,type)
 
     actual_figure = {
         "data": [

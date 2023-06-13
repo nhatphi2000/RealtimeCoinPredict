@@ -37,7 +37,7 @@ def get_historical_prices(coin_name, vs_currency, days):
                 unique_dates.add(date)
                 roc = None
                 if previous_price is not None:
-                    roc = (price_value - previous_price) / previous_price
+                    roc = (price_value - previous_price)*100 / previous_price 
                 historical_data.append({"Date": date, "Close": price_value, "ROC": roc})
                 previous_price = price_value
         
