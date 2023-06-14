@@ -102,6 +102,7 @@ def predict_RNN(coinname,type):
     RNN_prediction = scaler.inverse_transform(regressor.predict(X_input))
     Predict["Predictions"][0] = RNN_prediction[0][0]
 
+    print(RNN_prediction)
 
 
     inputs_data=new_dataset[len(new_dataset)-len(valid_data)-60:].values
@@ -114,7 +115,7 @@ def predict_RNN(coinname,type):
         
     X_test=np.array(X_test)
     X_test=np.reshape(X_test,(X_test.shape[0],X_test.shape[1],1))
-    print("do dai ne:",len(X_test))
+
 
     predicted_closing_price=regressor.predict(X_test)
     predicted_closing_price=scaler.inverse_transform(predicted_closing_price)

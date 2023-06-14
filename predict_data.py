@@ -51,8 +51,6 @@ def predictLSTM(coinname,type):
     x_train_data,y_train_data=np.array(x_train_data),np.array(y_train_data)
     x_train_data=np.reshape(x_train_data,(x_train_data.shape[0],x_train_data.shape[1],1))
 
-    print(new_dataset)
-
     lstm_model=Sequential()
     lstm_model.add(LSTM(units=50,return_sequences=True,input_shape=(x_train_data.shape[1],1)))
     lstm_model.add(LSTM(units=50))
@@ -90,7 +88,7 @@ def predictLSTM(coinname,type):
     X_input = np.reshape(X_input, (1,time_step,1))                    # reshaping : converting to 3D array
     LSTM_prediction = scaler.inverse_transform(lstm_model.predict(X_input))
     Predict["Predictions"][0] = LSTM_prediction[0][0]
-
+    print(LSTM_prediction)
 
 
     inputs_data=new_dataset[len(new_dataset)-len(valid_data)-60:].values

@@ -5,6 +5,7 @@ import plotly.graph_objs as go
 from crypto_data import get_formatted_coin_list
 from predict_data import predictLSTM
 from predict_data_RNN import predict_RNN
+from predict_data_XGboost import predict_XGboost
 from dash.dependencies import Input, Output
 
 app = dash.Dash()
@@ -13,6 +14,7 @@ server = app.server
 
 train, valid, predict, df = predictLSTM("bitcoin","Close")
 trainRNN, validRNN, predictRNN, dfRNN = predict_RNN("bitcoin","Close")
+trainXGboost, validXGboost, predictXGboost, dfXGboost = predict_XGboost("bitcoin","Close")
 coinList=get_formatted_coin_list() #lay danh sach coin, tuy nhien bi gioi han lan get api
 
 
@@ -26,7 +28,7 @@ app.layout = html.Div([
             html.Div([
 
                 html.Div([
-                    html.Label("Select a coin:"),
+                    html.Label("Select a coin and type:"),
                     dcc.Dropdown(
                         id="coin-dropdown",
                         options=coinList,
@@ -88,6 +90,13 @@ app.layout = html.Div([
                                         mode='lines+markers',
                                         line=dict(color="green"),
                                         name="RNN Predictions Price"
+                                    ),
+                                     go.Scatter(
+                                        x=validXGboost.index,
+                                        y=validXGboost["Predictions"],
+                                        mode='lines+markers',
+                                        line=dict(color="purple"),
+                                        name="XGboost Predictions Price"
                                     )
                                 ],
                                 "layout": go.Layout(
@@ -112,6 +121,12 @@ app.layout = html.Div([
                                         y=predictRNN["Predictions"],
                                         name="RNN",
                                         marker=dict(color="green")
+                                    ),
+                                    go.Bar(
+                                        x=["XGboost"],
+                                        y=predictXGboost["Predictions"],
+                                        name="XGboost",
+                                        marker=dict(color="purple")
                                     )
                                 ],
                                 "layout": go.Layout(
@@ -137,6 +152,7 @@ app.layout = html.Div([
 def update_graphs(coin,type):
     train, valid, predict, df = predictLSTM(coin,type)
     trainRNN, validRNN,predictRNN, dfRNN = predict_RNN(coin,type)
+    trainXGboost, validXGboost, predictXGboost, dfXGboost = predict_XGboost(coin,type)
 
     actual_figure = {
         "data": [
@@ -174,6 +190,12 @@ def update_graphs(coin,type):
                 mode='lines+markers',
                 name="RNN Predictions Price",
             ),
+             go.Scatter(
+                x=validXGboost.index,
+                y=validXGboost["Predictions"],
+                mode='lines+markers',
+                name="XGboost Predictions Price",
+            ),
             
         ],
         "layout": go.Layout(
@@ -196,7 +218,14 @@ def update_graphs(coin,type):
                 y=predictRNN["Predictions"],
                 name="RNN",
                 marker=dict(color="green")
-            )
+            ),
+            go.Bar(
+                x=["XGboost"],
+                y=predictXGboost["Predictions"],
+                name="XGboost",
+                marker=dict(color="purple")
+            ),
+            
         ],
         "layout": go.Layout(
             title='Predicted Next Day Closing Price',
