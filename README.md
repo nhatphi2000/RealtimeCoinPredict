@@ -5,3 +5,6 @@ www.youtube.com/watch?v=vV12dGe_Fho
 
 Run in terminal:
 python main.py
+
+
+video demo: https://www.youtube.com/watch?v=shX6If-jopw
